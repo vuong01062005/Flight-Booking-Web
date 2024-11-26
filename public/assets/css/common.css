@@ -1,0 +1,133 @@
+:root {
+    --color_main: #357ae8;
+    --color_1: #02753d;
+    --color_2: #687176;
+    --color_3: #f4ac05;
+}
+
+header {
+    width: 100%;
+    height: 50px;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    background-color: initial;
+    z-index: 100;
+}
+.header_logo {
+    font-size: 1.5rem;
+    color: var(--color_main);
+}
+.header_nav {
+    display: flex;
+    align-items: center;
+}
+.header_nav a {
+    color: var(--color_main);
+    font-size: 12px;
+    margin: 0.8rem;
+}
+.header_userInfo {
+    margin-left: 0.8rem;
+}
+.header_userInfo-logo {
+    display: flex;
+    font-size: 0.8rem;
+    color: var(--color_main);
+    border: 1px solid #fff;
+    padding: 0.4rem 0.8rem;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+}
+.header_userInfo-logo:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+.header_userInfo-logo img {
+    margin-right: 0.4rem;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+}
+
+.header_userInfo-info {
+    position: fixed;
+    margin-top: 1rem;
+    background-color: #fff;
+    width: 20%;
+    border-radius: 5%;
+}
+.header_userInfo-info {
+    display: none;
+    flex-direction: column;
+}
+.header_userInfo-info a {
+    display: flex;
+}
+.header_userInfo-info a label {
+    color: #000;
+    margin-left: 0.8rem;
+}
+.logout-button {
+    border: none;
+    background-color: initial;
+    display: flex;
+    margin: 0.8rem;
+    cursor: pointer;
+}
+.logout-button i {
+    margin-right: 0.8rem;
+}
+
+
+.h-font {
+    font-family: "Merienda", cursive;
+}
+.custom-bg {
+    background-color: #51d289 !important;
+}
+.custom-bg:hover {
+    background-color: #81988b !important;
+}
+
+.custom-alert {
+    position: fixed !important;
+    top: 80px;
+    right: 25px;
+}
+
+.btn-outline-dark {
+    background-color: #4285f4; /* Google Blue */
+    color: white;
+    border: none;
+    font-size: 16px;
+    padding: 10px 20px;
+    border-radius: 4px;
+    transition: background-color 0.3s;
+}
+
+.btn-outline-dark:hover {
+    background-color: #357ae8;
+}
+
+#dashboard-menu {
+    position: fixed;
+    height: 100%;
+    z-index: 11;
+}
+  
+@media screen and (max-width: 992px) {
+    #dashboard-menu {
+      height: auto;
+      width: 100%;
+    }
+  
+    #main-content {
+      margin-top: 60px;
+    }
+  
+    .custom-alert {
+      top: 120px;
+      right: 25px;
+    }
+}
