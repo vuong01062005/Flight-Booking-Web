@@ -3,11 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="Shortcut icon" href="images/logo.png">
-    <link rel="stylesheet" href="assets/css/common.css">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Giao dịch của tôi</title>
+    <link rel="stylesheet" href="{{ asset('assets/fontawesome-free-6.5.1-web/css/all.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/common.css') }}">
+
     <style>
-        /* Reset cơ bản */
         body {
             margin: 0;
             font-family: Arial, sans-serif;
@@ -138,18 +139,7 @@
     </style>
 </head>
 <body>
-    <?php 
-         session_start();
-         date_default_timezone_set("Asia/Ho_Chi_Minh");
-         
-         include_once('./model/database.php');
-         include('./admin/inc/essentials.php');
-        include("inc/header.php");
-        
-        if(!(isset($_SESSION['login']) && $_SESSION['login'] == true)) {
-            redirect('index.php');
-        }
-    ?>
+    @include('elements.header')
 
     <div class="container">
         <div class="row">
@@ -192,8 +182,6 @@
             </div>
         </div>
     </div>
-
-    <?php include("inc/footer.php"); ?>
 
     <script>
         const filterButtons = document.querySelectorAll('.filter-btn');

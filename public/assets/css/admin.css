@@ -77,7 +77,8 @@ body {
 
 /* Tiêu đề */
 .controller div .controller_ticket-title, 
-.controller div .controller_customer-title {
+.controller div .controller_customer-title,
+.controller div .controller_statistical-title {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -121,6 +122,7 @@ body {
 
 /* Mở menu */
 .controller_ticket.nav nav,
+.controller_statistical.nav nav,
 .controller_customer.nav nav {
     display: flex;
 }

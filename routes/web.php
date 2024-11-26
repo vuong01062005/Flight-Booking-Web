@@ -14,6 +14,14 @@ Route::get('/home', function () {
     return view('home');
 })->name('home');
 
+Route::get('/transaction-list', function () {
+    return view('transaction_list');
+})->name('transaction_list');
+
+Route::get('/my-bookings', function () {
+    return view('my_bookings');
+})->name('my_bookings');
+
 Route::get('register', [RegisterController::class, 'showForm'])->name('register.form');
 Route::post('send-verification-code', [RegisterController::class, 'sendVerificationCode'])->name('send.verification.code');
 Route::post('verify-code', [RegisterController::class, 'verifyCode'])->name('verify.code');

@@ -15,6 +15,18 @@
             <p>Khách hàng</p>
         </div>
         <nav>
+            <a href="">Tài khoản</a>
+            <a href="{{ route('admin-customer-contact') }}">Thông tin liên hệ</a>
+            <a href="{{ route('admin-customer-ticket') }}">Thông tin vé</a>
+        </nav>
+    </div>
+    <div class="controller_statistical" onclick="openItem('controller_statistical nav')">
+        <div class="controller_statistical-title">
+            <i class="fa-solid fa-person"></i>
+            <p>Thống kê</p>
+        </div>
+        <nav>
+            <a href="">Doanh</a>
             <a href="{{ route('admin-customer-contact') }}">Thông tin liên hệ</a>
             <a href="{{ route('admin-customer-ticket') }}">Thông tin vé</a>
         </nav>
