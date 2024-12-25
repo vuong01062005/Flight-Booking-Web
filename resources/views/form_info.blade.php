@@ -14,10 +14,10 @@
 </head>
 <body>
     <header class="header">
-        <a href="../index.php" class="header_logo">DINHVUONG</a>
+        <a href="{{ route('home') }}" class="header_logo">DINH VUONG</a>
         <nav class="header_step">
             <label>1</label>
-            <p>Điền thông tin {{ session('userID') }}</p>
+            <p>Điền thông tin</p>
             <span></span>
             <label>2</label>
             <p>Đặt chỗ</p>
@@ -814,6 +814,8 @@
         
 
         <input type="hidden" name="flight_code" value="{{ $flight_code }}">
+        <input type="hidden" name="departure_city" value="{{ $from }}">
+        <input type="hidden" name="arrival_city" value="{{ $to }}">
         <input type="hidden" name="price" value="{{ $price }}">
         <input type="hidden" name="chairType" value="{{ $chairType }}">
 

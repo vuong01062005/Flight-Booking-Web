@@ -7,230 +7,157 @@
     <title>Giao dịch của tôi</title>
     <link rel="stylesheet" href="{{ asset('assets/fontawesome-free-6.5.1-web/css/all.min.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/common.css') }}">
-
-    <style>
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background-color: #f8f9fa;
-        }
-
-        a {
-            text-decoration: none;
-            color: #007bff;
-        }
-
-        .container {
-            max-width: 800px;
-            margin: 20px auto;
-            padding: 20px;
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
-
-        /* Header */
-        .header {
-            font-size: 16px;
-            color: #007bff;
-            margin-bottom: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        /* Bộ lọc */
-        .filters {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-        .filters button {
-            padding: 8px 16px;
-            border: 1px solid #007bff;
-            background: #fff;
-            border-radius: 5px;
-            color: #007bff;
-            cursor: pointer;
-            transition: background 0.3s, color 0.3s;
-        }
-
-        .filters button.active {
-            background: #007bff;
-            color: #fff;
-        }
-
-        .filters button:hover {
-            background: #0056b3;
-            color: #fff;
-        }
-
-        /* Bộ lọc ngày */
-        .date-input {
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-        }
-
-        .btn-apply {
-            padding: 8px 16px;
-            background-color: #007bff;
-            color: #fff;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-
-        .btn-apply:hover {
-            background-color: #0056b3;
-        }
-
-        /* Kết quả */
-        .empty-box {
-            text-align: center;
-            padding: 20px;
-            background: #f8f9fa;
-            border: 1px solid #ddd;
-            border-radius: 10px;
-        }
-
-        .empty-box img {
-            width: 50px;
-            height: 50px;
-            margin-bottom: 10px;
-        }
-
-        .result-item {
-            padding: 15px;
-            border-bottom: 1px solid #ddd;
-        }
-
-        .result-item h3 {
-            margin: 0 0 5px;
-            color: #333;
-        }
-
-        .result-item p {
-            margin: 0;
-            font-size: 14px;
-            color: #666;
-        }
-
-        /* Liên kết đường dẫn */
-        .breadcrumb {
-            font-size: 14px;
-            margin-bottom: 20px;
-        }
-
-        .breadcrumb a {
-            color: #6c757d;
-            text-decoration: none;
-        }
-
-        .breadcrumb span {
-            color: #6c757d;
-        }
-
-        .breadcrumb a:hover {
-            text-decoration: underline;
-        }
-    </style>
+    <link rel="stylesheet" href="{{ asset('assets/css/transaction_list.css') }}">
 </head>
 <body>
     @include('elements.header')
 
     <div class="container">
-        <div class="row">
-            <div class="col-12 my-5 px-4">
-                <h2 class="fw-bold">Lịch sử giao dịch</h2>
-                <div class="breadcrumb">
+        <div class="container_content">
+            <div>
+                <h2>Lịch sử giao dịch</h2>
+                <div class="container_content-link">
                     <a href="index.php">Trang chủ</a>
                     <span> &gt; </span>
                     <a href="#">Giao dịch của tôi</a>
                 </div>     
             </div>       
             
-            <div class="header">
+            <div class="container_content-header">
                 <span>Xem tất cả vé máy bay và phiếu thanh toán trong <a href="my_bookings.php">Đặt chỗ của tôi</a></span>
             </div>
-
-            <div class="filters">
+            
+            <div class="container_content-filters">
                 <button class="filter-btn active" data-range="90-days">90 ngày qua</button>
-                <button class="filter-btn" data-month="10-2024">Tháng 10 2024</button>
-                <button class="filter-btn" data-month="9-2024">Tháng 9 2024</button>
+                <button class="filter-btn" data-range="10-2024">Tháng 10 2024</button>
+                <button class="filter-btn" data-range="9-2024">Tháng 9 2024</button>
                 <button class="filter-btn" data-range="custom">Ngày tùy chọn</button>
             </div>
 
-            <div id="custom-range" style="margin-top: 20px; display: none;">
+            <div class="container_content-fromTo">
                 <label for="start-date">Từ:</label>
-                <input type="date" id="start-date" class="date-input">
+                <input type="date" id="start-date">
                 <label for="end-date">Đến:</label>
-                <input type="date" id="end-date" class="date-input">
-                <button id="apply-filter" class="btn-apply">Lọc</button>
+                <input type="date" id="end-date">
+                <button id="apply-filter">Lọc</button>
             </div>
 
-            <div id="results">
-                <div class="empty-box">
+            <div id="container_content-results">
+                @if (count($payments) <= 0)
+                <div class="container_content-results-empty-box">
                     <img src="https://img.icons8.com/ios-filled/50/000000/sleeping-in-bed.png">
                     <p>Không tìm thấy giao dịch</p>
                     <p>
                         Không tìm thấy giao dịch cho sản phẩm bạn chọn. Đặt lại bộ lọc để xem tất cả giao dịch.
                     </p>
                 </div>
+                @else
+                @foreach ($payments as $paymentGroup)
+                @foreach ($paymentGroup as $payment)
+                @foreach ($contacts as $contact)
+                @if ($payment['contactID'] == $contact->id)
+                <div class="container_content-results-true">
+                    <div class="results_true-transaction">
+                        <div class="results_true-transaction-header">
+                            <span class="results_true-transaction-header-date">{{ $payment['created_at'] }}</span>
+                            <div>
+                                <p>{{ $contact->departure_city }}</p>
+                                <i class="fa-solid fa-plane-departure"></i>
+                                <p>{{ $contact->arrival_city }}</p>
+                            </div>
+                            <span class="results_true-transaction-header-method">{{ $payment['method'] }}</span>
+                        </div>
+                        <div class="results_true-transaction-details">
+                            <p><strong>Mã đặt chỗ:</strong> {{ $contact->booking_code }}</p>
+                            <p class="results_true-transaction-details-price"><strong>{{ $payment['amount'] }}</strong>&nbsp;VND</p>
+                        </div>
+                    </div>
+                </div>
+                @endif
+                @endforeach
+                @endforeach
+                @endforeach
+                @endif
             </div>
         </div>
     </div>
 
+
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
-        const filterButtons = document.querySelectorAll('.filter-btn');
-        const customRange = document.getElementById('custom-range');
+        $(document).ready(function() {
+            $('.filter-btn').click(function() {
+                var date = $(this).data('range');
+                var ID_account = "{{ session('userID') }}";
 
-        filterButtons.forEach(button => {
-            button.addEventListener('click', function () {
-                filterButtons.forEach(btn => btn.classList.remove('active'));
-                this.classList.add('active');
+                $('.filter-btn').removeClass('active');
+                $(this).addClass('active');
+    
+                $.ajax({
+                    url: "/filter-transactions/{{ session('userID') }}?date=" + date,
+                    method: 'POST',
+                    data: {
+                        date: date,
+                        ID_account: ID_account,
+                        _token: '{{ csrf_token() }}'
+                    }, 
+                    success: function(response) {
+                        if (response.status === 'success') {
+                            var payments = response.payments;
+                            var contacts = response.contacts;
+                            $('#container_content-results').empty();
 
-                if (this.getAttribute('data-range') === 'custom') {
-                    customRange.style.display = 'block';
-                } else {
-                    customRange.style.display = 'none';
-                    fetchDataByFilter(this.getAttribute('data-range') || this.getAttribute('data-month'));
-                }
-            });
-        });
-
-        function fetchDataByFilter(filterType) {
-            let url = `ajax/fetch_data.php?filter=${filterType}`;
-            fetch(url)
-                .then(response => response.json())
-                .then(data => {
-                    const resultsDiv = document.getElementById('results');
-                    resultsDiv.innerHTML = '';
-
-                    if (data.length > 0) {
-                        data.forEach(item => {
-                            resultsDiv.innerHTML += `
-                                <div class="result-item">
-                                    <h3>${item.title}</h3>
-                                    <p>Ngày: ${item.date}</p>
-                                    <p>Giá: ${item.price} VNĐ</p>
+                            let hasData = payments.some(paymentGroup => paymentGroup.length > 0);
+                            if (!hasData) {
+                                $('#container_content-results').append(`
+                                <div class="container_content-results-empty-box">
+                                    <img src="https://img.icons8.com/ios-filled/50/000000/sleeping-in-bed.png">
+                                    <p>Không tìm thấy giao dịch</p>
+                                    <p>
+                                        Không tìm thấy giao dịch cho sản phẩm bạn chọn. Đặt lại bộ lọc để xem tất cả giao dịch.
+                                    </p>
                                 </div>
-                            `;
-                        });
-                    } else {
-                        resultsDiv.innerHTML = `
-                            <div class="empty-box">
-                                <img src="https://img.icons8.com/ios-filled/50/000000/sleeping-in-bed.png">
-                                <p>Không tìm thấy giao dịch</p>
-                                <p>Đặt lại bộ lọc để xem tất cả giao dịch.</p>
-                            </div>
-                        `;
+                                `)
+                            } else {
+                                payments.forEach(paymentGroup => {
+                                    if (paymentGroup.length > 0) {
+                                        paymentGroup.forEach(payment => {
+                                            contacts.forEach(contact => {
+                                                if (payment['contactID'] == contact.id) {
+                                                    $('#container_content-results').append(`
+                                                    <div class="container_content-results-true">
+                                                        <div class="results_true-transaction">
+                                                            <div class="results_true-transaction-header">
+                                                                <span class="results_true-transaction-header-date">${ payment['created_at'] }</span>
+                                                                <div>
+                                                                    <p>${ contact.departure_city }</p>
+                                                                    <i class="fa-solid fa-plane-departure"></i>
+                                                                    <p>${ contact.arrival_city }</p>
+                                                                </div>
+                                                                <span class="results_true-transaction-header-method">${ payment['method'] }</span>
+                                                            </div>
+                                                            <div class="results_true-transaction-details">
+                                                                <p><strong>Mã đặt chỗ:</strong> ${ contact.booking_code }</p>
+                                                                <p class="results_true-transaction-details-price"><strong>${ payment['amount'] }</strong>&nbsp;VND</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    `)
+                                                }
+                                            })
+                                        })
+                                    }
+                                });
+                            }
+                        } else {
+                            console.log(response.message);
+                        }
                     }
                 })
-                .catch(error => console.error('Lỗi:', error));
-        }
+            });
+        });
     </script>
+</script>
 </body>
 </html>

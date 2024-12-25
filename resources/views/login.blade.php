@@ -237,12 +237,3 @@
     </script>
 </body>
 </html>
-
-
-
-
-{{-- <div class="mb-5 text-center">
-    <button class="btn btn-outline-dark">
-    <i class="fab fa-google me-2"></i> Sign in with Google
-    </button>           
-</div> --}}

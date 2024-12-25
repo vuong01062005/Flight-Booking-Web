@@ -3,11 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\AccountUser;
 use App\Models\ContactList;
 use App\Models\CustomerList;
 use DateTime;
 use Illuminate\Http\Request;
 use App\Models\FlightChairList;
+use App\Models\FlightList;
+use App\Models\Payment;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 
 class HomeController extends Controller
@@ -17,16 +21,15 @@ class HomeController extends Controller
         return view('home');
     }
 
-    public function edit_profile()
+    public function edit_profile($id)
     {
-        return view('edit_profile');
+        $AccountUser = new AccountUser();
+        $user = $AccountUser->getAccount($id);
+
+        return view('edit_profile', compact('user'));
     }
 
     public function flight_list(Request $request) {
-        $userID = session('userID');
-        $firstName = session('firstName');
-        $lastName = session('lastName');
-        $avatar = session('avatar');
         $from = $request->query('from');
         $to = $request->query('to');
         $departure = $request->query('departure');
@@ -42,10 +45,6 @@ class HomeController extends Controller
         $count_ticket = intval($countAdult) + intval($countChild) + intval($countInfant);
 
         return view('flight_list', compact(
-            'userID',
-            'firstName',
-            'lastName',
-            'avatar',
             'from',
             'to',
             'departure',
@@ -190,9 +189,15 @@ class HomeController extends Controller
         }
         
         $flight_code = $request->input('flight_code');
+        $departure_city = $request->input('departure_city');
+        $arrival_city = $request->input('arrival_city');
         $flight_codeReturn = $request->input('flight_codeReturn');
         $price = $request->input('price');
         $chairType = $request->input('chairType');
+
+        $ContactList = new ContactList();
+        $bookingCode = $ContactList->getBookingCode()->booking_code;
+        $bookingCode += 1;
 
         return view('pay', compact(
             'contact_firstName',
@@ -234,9 +239,12 @@ class HomeController extends Controller
             'chair_InfantReturn',
 
             'flight_code',
+            'departure_city',
+            'arrival_city',
             'flight_codeReturn',
             'price',
             'chairType',
+            'bookingCode'
         ));
     }
 
@@ -274,6 +282,8 @@ class HomeController extends Controller
         $ContactList = new ContactList();
         $CustomerList = new CustomerList();
         $FlightChairList = new FlightChairList();
+        $Payment = new Payment();
+        $AccountUser = new AccountUser();
 
         $request->validate([
             'userID' => 'required',
@@ -281,7 +291,7 @@ class HomeController extends Controller
             'contact_lastName' => 'required',
             'contact_phone' => 'required',
             'contact_email' => 'required',
-            'image_transfer' => 'required',
+            'image_transfer' => 'nullable',
             'customer_type' => 'required',
 
             'customerAdult' => 'required',
@@ -292,20 +302,35 @@ class HomeController extends Controller
             'chairInfantReturn' => 'required',
 
             'flight_code' => 'required',
-            'flight_codeReturn' => 'required',
+            'departure_city' => 'required',
+            'arrival_city' => 'required',
+            'flight_codeReturn' => 'nullable',
+
+            'price' => 'required',
+            'method' => 'required',
+            'booking_code' => 'required'
         ]);
 
+        $sub = $request->price;
         if ($request->hasFile('image_transfer')) {
             $icon = $request->file('image_transfer')->store('images', 'public');
+            $contact_id = $ContactList->addContact($request->userID, $request->contact_firstName, $request->contact_lastName, $request->contact_phone, $request->contact_email, $icon, $request->booking_code, $request->departure_city, $request->arrival_city, 'Chưa bay');
         } else {
-            return response()->json([
-                'message' => 'Cần phải có file ảnh.'
-            ]);
+            $wallet = $AccountUser->getWalletbyID($request->userID);
+            $wallet = (int) str_replace('.', '', $wallet);
+            $price = (int) str_replace('.', '', $request->price);
+
+            if ($wallet < $price) {
+                return response()->json([
+                    'message' => 'Tiền trong ví của bạn không đủ để thanh toán',
+                ]);
+            }
+            $sub = number_format($wallet - $price, 0, '', '.');
+            $contact_id = $ContactList->addContact($request->userID, $request->contact_firstName, $request->contact_lastName, $request->contact_phone, $request->contact_email, '', $request->booking_code, $request->departure_city, $request->arrival_city, 'Chưa bay');
         }
 
         try {
-
-            $contact_id = $ContactList->addContact($request->userID, $request->contact_firstName, $request->contact_lastName, $request->contact_phone, $request->contact_email, $icon);
+            $Payment->addPayment($contact_id, $sub, date('Y-m-d'), $request->method);
 
             $customerAdults = json_decode($request->customerAdult);
             $chairAdultReturns = json_decode($request->chairAdultReturn);
@@ -313,6 +338,7 @@ class HomeController extends Controller
                 foreach ($customerAdults as $key => $customer) {
                     $CustomerList->addCustomer(
                         $contact_id,
+                        'Người lớn',
                         $request->customer_type,
                         $customer->title,
                         $customer->firstName,
@@ -320,6 +346,8 @@ class HomeController extends Controller
                         $customer->birthday,
                         $request->flight_code,
                         $customer->chair,
+                        $customer->nation,
+                        0
                     );
 
                     $FlightChairList->reservations(
@@ -332,13 +360,16 @@ class HomeController extends Controller
                     if (isset($request->flight_codeReturn)) {
                         $CustomerList->addCustomer(
                             $contact_id,
+                            'Người lớn',
                             $request->customer_type,
                             $customer->title,
                             $customer->firstName,
                             $customer->lastName,
                             $customer->birthday,
                             $request->flight_codeReturn,
-                            $chairAdultReturns[$key]->chair
+                            $chairAdultReturns[$key]->chair,
+                            $customer->nation,
+                            1
                         );
 
                         $FlightChairList->reservations(
@@ -357,6 +388,7 @@ class HomeController extends Controller
                 foreach ($customerChilds as $key => $customer) {
                     $CustomerList->addCustomer(
                         $contact_id,
+                        'Trẻ em',
                         $request->customer_type,
                         $customer->title,
                         $customer->firstName,
@@ -364,6 +396,8 @@ class HomeController extends Controller
                         $customer->birthday,
                         $request->flight_code,
                         $customer->chair,
+                        $customer->nation,
+                        0
                     );
 
                     
@@ -378,13 +412,16 @@ class HomeController extends Controller
                     if (isset($request->flight_codeReturn)) {
                         $CustomerList->addCustomer(
                             $contact_id,
+                            'Trẻ em',
                             $request->customer_type,
                             $customer->title,
                             $customer->firstName,
                             $customer->lastName,
                             $customer->birthday,
                             $request->flight_codeReturn,
-                            $chairChildReturns[$key]->chair
+                            $chairChildReturns[$key]->chair,
+                            $customer->nation,
+                            1
                         );
 
                         $FlightChairList->reservations(
@@ -403,6 +440,7 @@ class HomeController extends Controller
                 foreach ($customerInfants as $key => $customer) {
                     $CustomerList->addCustomer(
                         $contact_id,
+                        'Sơ sinh',
                         $request->customer_type,
                         $customer->title,
                         $customer->firstName,
@@ -410,6 +448,8 @@ class HomeController extends Controller
                         $customer->birthday,
                         $request->flight_code,
                         $customer->chair,
+                        $customer->nation,
+                        0
                     );
 
                     
@@ -424,13 +464,16 @@ class HomeController extends Controller
                     if (isset($request->flight_codeReturn)) {
                         $CustomerList->addCustomer(
                             $contact_id,
+                            'Sơ sinh',
                             $request->customer_type,
                             $customer->title,
                             $customer->firstName,
                             $customer->lastName,
                             $customer->birthday,
                             $request->flight_codeReturn,
-                            $chairInfantReturns[$key]->chair
+                            $chairInfantReturns[$key]->chair,
+                            $customer->nation,
+                            1
                         );
 
                         $FlightChairList->reservations(
@@ -443,10 +486,279 @@ class HomeController extends Controller
                 }
             }
 
-            return response()->json(['message' => 'Booking successful'], 200);
+            return response()->json([
+                'message' => 'Đặt vé thành công',
+            ], 200);
         } catch (\Exception $e) {
             Log::error('Database query failed: ' . $e->getMessage());
             return response()->json(['error' => 'Booking failed'], 500);
+        }
+    }
+
+
+    public function updateInfo(Request $request, $id) {
+        $request->validate([
+            'fname' => 'required',
+            'lname' => 'required',
+            'phone' => 'required',
+            'email' => 'required',
+        ]);
+
+        $acc = new AccountUser();
+        $acc->updateInfo($id, $request->fname, $request->lname, $request->phone, $request->email);
+
+        return redirect()->back()->with('success', 'Cập nhật thông tin thành công.');
+    }
+
+    public function updateAvatar(Request $request, $id) {
+        $request->validate([
+            'avatar' => 'required',
+        ]);
+        $acc = new AccountUser();
+        if ($request->hasFile('avatar')) {
+            $icon = $request->file('avatar')->store('images', 'public');
+            $acc->updateAvatar($id, $icon);
+            session(['avatar' => $icon]);
+            return redirect()->back()->with('success', 'Cập nhật ảnh thành công.');
+        }
+
+        return redirect()->back()->with('error', 'Cần phải có file ảnh.');
+    }
+
+    public function updatePass(Request $request, $id) {
+        $request->validate([
+            'new_pass' => 'required',
+            'confirm_pass' => 'required',
+        ]);
+
+        if ($request->new_pass !== $request->confirm_pass) {
+            return redirect()->back()->with('error', 'Mật khẩu không khớp nhau.');
+        }
+
+        $acc = new AccountUser();
+        $acc->updatePass($id, bcrypt($request->new_pass));
+        return redirect()->back()->with('success', 'Thay đổi mật khẩu thành công');
+    }
+
+    public function my_bookings($id) {
+        $ContactList = new ContactList();
+        $CustomerList = new CustomerList();
+        $FlightList = new FlightList();
+
+        $myBookings = $ContactList->getIDbyUserIDAccount($id);
+        $tickets = [];
+        foreach ($myBookings as $booking) {
+            $tickets[] = $CustomerList->getMybookingsByIDContact($booking->id)->toArray();
+        }
+        return view('my_bookings', compact('myBookings', 'tickets'));
+    }
+
+    public function transactionList($id) {
+        $Payment = new Payment();
+        $ContactList = new ContactList();
+
+        $contacts = $ContactList->getIDbyUserIDAccount($id);
+        $payments = [];
+        foreach ($contacts as $contact) {
+            $payments[] = $Payment->getPayment($contact->id)->toArray();
+        }
+        return view('transaction_list', compact('payments', 'contacts'));
+    }
+
+    public function filterTransactions(Request $request)
+    {
+        $date = $request->input('date');
+        $ID_account = $request->input('ID_account');
+
+        try {
+            $Payment = new Payment();
+            $ContactList = new ContactList();
+
+            $contacts = $ContactList->getIDbyUserIDAccount($ID_account);
+            $payments = [];
+            foreach ($contacts as $contact) {
+                $payments[] = $Payment->getPaymentByDate($contact->id, $date)->toArray();
+            }
+            
+            return response()->json([
+                'status' => 'success',
+                'payments' => $payments,
+                'contacts' => $contacts
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => $e->getMessage()
+            ]);
+        }
+    }
+
+    public function changeTicket($id, $date) {
+        $CustomerList = new CustomerList();
+        $FlightList = new FlightList();
+
+        $customers = $CustomerList->getCustomerFlightByID($id);
+
+        $flights = $FlightList->get_flights($customers->departure_city, $customers->arrival_city, $date, $customers->customer_type);
+        return view('changeTicket.flight_list', compact('customers', 'flights'));
+    }
+    
+    public function filterFlight(Request $request) {
+        $FlightList = new FlightList();
+
+        $departure = $request->input('departure');
+        $arrival = $request->input('arrival');
+        $date = $request->input('date');
+        $customer_type = $request->input('customer_type');
+
+        try {
+            $flights = $FlightList->get_flights($departure, $arrival, $date, $customer_type);
+            return response()->json([
+                'success' => true,
+                'flights' => $flights]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
+
+    public function changeTicketInfo($customer_id, $flight_id) {
+        $CustomerList = new CustomerList();
+        $ContactList = new ContactList();
+        $FlightList = new FlightList();
+
+        $customers = $CustomerList->getCustomerFlightByID($customer_id);
+        $flight = $FlightList->flightByID($flight_id);
+
+        $contact = $ContactList->getContactByID($customers->id_contact);
+        return view('changeTicket.form_info', compact('customers', 'contact', 'flight'));
+    }
+
+    public function wallet($id) {
+        return view('my_wallet', compact('id'));
+    }
+
+    public function addPayment(Request $request) {
+        $ID_account = $request->input('ID_account');
+        $amount = $request->input('amount');
+        $method = $request->input('method');
+
+        try {
+            $AccountUser = new AccountUser();
+            $Payment = new Payment();
+
+            $wallet = $AccountUser->getWalletbyID($ID_account);
+            $walletOld = (int) str_replace('.', '', $wallet->wallet);
+            $amount = (int) str_replace('.', '', $amount);
+            $walletNew = number_format($walletOld + $amount, 0, ',', '.');
+            session(['wallet' => $walletNew]);
+
+            $AccountUser->updateWallet($ID_account, $walletNew);
+
+            $Payment->addPayment('', $amount, date('Y-m-d'), $method);
+            return response()->json([
+                'success' => true,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function confirmChange(Request $request) {
+        $customer_id = $request->input('customer_id');
+        $titleName = $request->input('titleName');
+        $firstName = $request->input('firstName');
+        $lastName = $request->input('lastName');
+        $nation = $request->input('nation');
+        $date = $request->input('date');
+        $flight_code = $request->input('flight_code');
+        $chair_number = $request->input('chair_number');
+        $flight_codeOld = $request->input('flight_codeOld');
+        $ticket_type = $request->input('ticket_type');
+        $chair_numberOld = $request->input('chair_numberOld');
+        $price = $request->input('price');
+        $wallet = $request->input('wallet');
+        $ID_account = $request->input('ID_account');
+
+        try {
+            $CustomerList = new CustomerList();
+            $FlightChairList = new FlightChairList();
+            $AccountUser = new AccountUser();
+
+            $wallet = (int) str_replace('.', '', $wallet);
+            $price = (int) str_replace('.', '', $price);
+
+            $sub = number_format($wallet - $price, 0, '', '.');
+
+            $AccountUser->updateWallet($ID_account, $sub);
+            $CustomerList->updateCustomer($customer_id, $titleName, $firstName, $lastName, $date, $flight_code, $chair_number, $nation);
+            $FlightChairList->reservations('Chưa đặt', $flight_codeOld, $ticket_type, $chair_numberOld);
+            $FlightChairList->reservations('Đã đặt', $flight_code, $ticket_type, $chair_number);
+            return response()->json([
+                'success' => true,
+                'message' => 'Vé của bạn đã được thay đổi thành công.',
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => true,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function cancelTicket(Request $request) {
+        $id = $request->input('id');
+        $id_account = $request->input('id_account');
+
+        try {
+            $CustomerList = new CustomerList();
+            $FlightList = new FlightList();
+            $AccountUser = new AccountUser();
+            $FlightChairList = new FlightChairList();
+
+            $customer = $CustomerList->getCustomerByID($id);
+            $flight = $FlightList->getFlightByCode($customer->flight_code);
+
+            $currentDateTime = Carbon::now();
+            $flightDateTime = Carbon::createFromFormat('Y-m-d H:i:s', $flight->flight_date . ' ' . $flight->departure_time . ':00');
+            $diffInHours = $currentDateTime->diffInHours($flightDateTime, false);
+            if ($diffInHours < 12) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Vé của bạn không thể hủy vì thời gian bay sắp đến.'
+                ]);
+            }
+            $CustomerList->deleteCustomer($id);
+
+            $wallet = $AccountUser->getWalletbyID($id_account);
+            $walletOld = (int) str_replace('.', '', $wallet->wallet);
+            $price = 0;
+            if ($customer->age_category == 'Người lớn') {
+                $pricechair = $FlightChairList->getPrice('price_adult', $customer->flight_code, $customer->customer_type, $customer->chair_number);
+                $price = $pricechair->price_adult;
+            } elseif ($customer->age_category == 'Trẻ em') {
+                $pricechair = $FlightChairList->getPrice('price_child', $customer->flight_code, $customer->customer_type, $customer->chair_number);
+                $price = $pricechair->price_child;
+            } elseif ($customer->age_category == 'Sơ sinh') {
+                $pricechair = $FlightChairList->getPrice('price_infant', $customer->flight_code, $customer->customer_type, $customer->chair_number);
+                $price = $pricechair->price_infant;
+            }
+            $amount = (int) str_replace('.', '', $price);
+            $walletNew = number_format($walletOld + $amount, 0, ',', '.');
+            $AccountUser->updateWallet($id_account, $walletNew);
+            session(['wallet' => $walletNew]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Hủy vé thành công. Số tiền sẽ được trả lại vào ví tiền của bạn. Vào ví của tôi để kiểm tra lại.'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => true,
+                'message' => $e->getMessage()
+            ], 500);
         }
     }
 }

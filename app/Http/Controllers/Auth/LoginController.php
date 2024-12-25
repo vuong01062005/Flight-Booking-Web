@@ -29,6 +29,7 @@ class LoginController extends Controller
                 'firstName' => $user->firstName,
                 'lastName' => $user->lastName,
                 'avatar' => $user->Avatar,
+                'wallet' => $user->wallet,
             ]);
 
             if ($user->id == 1)  {

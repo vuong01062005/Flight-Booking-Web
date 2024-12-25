@@ -45,7 +45,7 @@
                             <option value="DAD Đà Nẵng">Sân bay Đà Nẵng ( DAD )</option>
                             <option value="VDO Quảng Ninh">Sân bay Vân Đồn ( VDO )</option>
                             <option value="HPH Hải Phòng">Sân bay Cát Bì ( HPH )</option>
-                            <option value="VII Nghệ An">Sn bay Vinh ( VII )</option>
+                            <option value="VII Nghệ An">Sân bay Vinh ( VII )</option>
                             <option value="HUI Huế">Sân bay Phú Bài ( HUI )</option>
                             <option value="CXR Khánh Hòa">Sân bay Cam Ranh ( CXR )</option>
                             <option value="DLI Lâm Đồng">Sân bay Liên Khương ( DLI )</option>

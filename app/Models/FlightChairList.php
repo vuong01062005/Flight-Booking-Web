@@ -53,4 +53,34 @@ class FlightChairList extends Model
                 ->where('chair_number', $chair_number)
                 ->update(['status' => $status]);
     }
+
+    public function updateFlightChair($flight_code, $ticket_type, $chair_number, $price_adult, $price_child, $price_infant) {
+        $flight = self::where('flight_code', $flight_code)->update([
+            'ticket_type' => $ticket_type,
+            'chair_number' => $chair_number,
+            'price_adult' => $price_adult,
+            'price_child' => $price_child,
+            'price_infant' => $price_infant,
+            'status' => 'Chưa đặt',
+        ]);
+    }
+
+    public function getPrice($age_category, $flight_code, $ticket_type, $chair_number) {
+        $query = self::select($age_category)
+                ->where('flight_code', $flight_code)
+                ->where('ticket_type', $ticket_type)
+                ->where('chair_number', $chair_number)
+                ->first();
+
+        return $query;
+    }
+
+    public function getPricenotChairNumber($age_category, $flight_code, $ticket_type) {
+        $query = self::select($age_category)
+                ->where('flight_code', $flight_code)
+                ->where('ticket_type', $ticket_type)
+                ->first();
+
+        return $query;
+    }
 }

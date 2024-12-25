@@ -168,43 +168,36 @@
         <div class="row">
             <!-- Page Header -->
             <div class="col-12 my-5 px-4">
-                <h2 class="fw-bold">Lịch sử giao dịch</h2>
+                <h2 class="fw-bold">Chỉnh sửa hồ sơ</h2>
                 <div class="breadcrumb">
                     <a href="index.php">Trang chủ</a>
                     <span> &gt; </span>
-                    <a href="#">Giao dịch của tôi</a>
+                    <a href="#">Hồ sơ của tôi</a>
                 </div>     
             </div>
 
             <!-- Profile Form -->
             <div class="col-12">
                 <div class="bg-white">
-                    <form id="info-form">
+                    <form id="info-form" method="POST" action="{{ route('updateInfo', ['id'=>$user->id]) }}">
+                        @csrf
                         <h5>Thông tin của tôi</h5>
                         <div class="row">
                             <div class="col-md-4">
                                 <label>Tên</label>
-                                <input type="text" name="fname" value="{{ session('firstName') }}" required>
+                                <input type="text" name="fname" value="{{ $user->firstName }}" required>
                             </div>
                             <div class="col-md-4">
                                 <label>Họ</label>
-                                <input type="text" name="lname" value="{{ session('lastName') }}" required>
-                            </div>
-                            <div class="col-md-4">
-                                <label>Tên người dùng</label>
-                                <input type="text" name="name" required>
+                                <input type="text" name="lname" value="{{ $user->lastName }}" required>
                             </div>
                             <div class="col-md-4">
                                 <label>Số điện thoại</label>
-                                <input type="number" name="phonenum" required>
+                                <input type="number" name="phone" value="{{ $user->Phone }}" required>
                             </div>
                             <div class="col-md-4">
-                                <label>Ngày sinh</label>
-                                <input type="date" name="dob" required>
-                            </div>
-                            <div class="col-md-8">
-                                <label>Địa chỉ</label>
-                                <textarea name="address" rows="1" required>đá</textarea>
+                                <label>Email</label>
+                                <input type="email" name="email" value="{{ $user->Email }}" required>
                             </div>
                         </div>
                         <button type="submit">Lưu thay đổi</button>
@@ -215,11 +208,12 @@
             <!-- Profile Image -->
             <div class="col-md-4">
                 <div class="bg-white">
-                    <form id="profile-form">
+                    <form id="profile-form" method="post" enctype="multipart/form-data" action="{{ route('updateAvatar', ['id'=>$user->id]) }}">
+                        @csrf
                         <h5>Hình ảnh</h5>
-                        <img src="{{ asset('storage/' . session('avatar')) }}">
+                        <img src="{{ asset('storage/' . $user->Avatar) }}">
                         <label>Hình ảnh mới</label>
-                        <input name="profile" type="file" accept=".jpg, .jpeg, .png, .webp" required> 
+                        <input name="avatar" type="file" accept=".jpg, .jpeg, .png, .webp" required> 
                         <button type="submit">Lưu thay đổi</button>
                     </form>
                 </div>           
@@ -228,7 +222,8 @@
             <!-- Password Change -->
             <div class="col-md-8">
                 <div class="bg-white">
-                    <form id="pass-form">
+                    <form id="pass-form" method="POST" action="{{ route('updatePass', ['id'=>$user->id]) }}">
+                        @csrf
                         <h5>Đổi mật khẩu</h5>
                         <div class="row">
                             <div class="col-md-6">
@@ -246,122 +241,17 @@
             </div>
         </div>
     </div>
+@if(session('success'))
+    <script>
+        alert("{{ session('success') }}");
+    </script>
+@endif
+@if(session('error'))
+    <script>
+        alert("{{ session('error') }}");
+    </script>
+@endif
 
-<script>
-    let info_form = document.getElementById('info-form');
-
-    info_form.addEventListener('submit', (e) =>{
-        e.preventDefault();
-
-        let data = new FormData();
-        data.append('info_form','');
-        data.append('fname',info_form.elements['fname'].value);
-        data.append('lname',info_form.elements['lname'].value);
-        data.append('name',info_form.elements['name'].value);
-        data.append('phonenum',info_form.elements['phonenum'].value);
-        data.append('address',info_form.elements['address'].value);
-        data.append('dob',info_form.elements['dob'].value);
-
-        let xhr = new XMLHttpRequest();
-        xhr.open("POST", "ajax/profile.php", true);
-
-        xhr.onload = function () {
-            let response = this.responseText.trim();
-            console.log(response);
-            if(response == 'phone_already'){
-                alert('error', "Phone number is already registered!");
-            } else if(response == 0){
-                alert('error', "No Changes Made!");
-            }else{
-                alert('success', 'Changes Success')
-            }
-        };
-
-        xhr.send(data);
-    });
-
-    let profile_form = document.getElementById('profile-form');
-
-    profile_form.addEventListener('submit', (e)=>{
-        e.preventDefault();
-
-
-        let data = new FormData();
-
-        data.append('profile_form','');
-        data.append('profile',profile_form.elements['profile'].files[0]);
-        
-
-        let xhr = new XMLHttpRequest();
-        xhr.open("POST", "ajax/profile.php", true);
-
-        xhr.onload = function () {
-
-            let response = this.responseText.trim();
-            console.log(response);
-
-            if(response === 'inv_img') {
-                alert('error', "Only JPG, WEBP & PNG images are allowed");
-            }
-            else if(response === 'upd_failed') {
-                alert('error', "Image upload failed");
-            }
-            else if(response == 0){
-                alert('error', "Updation failed!");
-            }
-            else{
-                window.location.href = window.location.pathname;
-            }
-        };
-
-        xhr.send(data);
-    });
-
-    let pass_form = document.getElementById('pass-form');
-    
-    pass_form.addEventListener('submit', (e)=>{
-        e.preventDefault();
-
-        let new_pass = pass_form.elements['new_pass'].value;
-        let confirm_pass = pass_form.elements['confirm_pass'].value;
-
-        if(new_pass != confirm_pass){
-            alert('error',"Password do not match!");
-            return false;
-        }
-
-
-        let data = new FormData();
-
-        data.append('pass_form','');
-        data.append('new_pass',new_pass);
-        data.append('confirm_pass',confirm_pass);
-        
-
-        let xhr = new XMLHttpRequest();
-        xhr.open("POST", "ajax/profile.php", true);
-
-        xhr.onload = function () {
-
-            let response = this.responseText.trim();
-            //console.log(response);
-
-            if(response === 'mismatch') {
-                alert('error', "Password do not match!");
-            }
-            else if(response == 0){
-                alert('error', "Updation failed!");
-            }
-            else{
-                alert('success',"Changes Saved");
-                pass_form.reset();
-            }
-        };
-
-        xhr.send(data);
-    });
-    
-</script>
 
 </body>
 </html>

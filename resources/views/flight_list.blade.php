@@ -20,56 +20,7 @@ $flight_listsReturn = $FlightList->get_flights($to, $from, $return_date, $chairT
     <link rel="stylesheet" href="{{ asset('assets/css/flight_list.css') }}">
 </head>
 <body>
-    <header class="header">
-        <a href="" class="header_logo">DINHVUONG</a>
-        <nav class="header_nav">
-            <a href="">Trang Chủ</a>
-            <a href="">Giới Thiệu</a>
-            <a href="">Liên Hệ</a>
-            <div class="header_userInfo">
-            @if ($userID)
-                <div class="header_userInfo-logo">
-                    <img src="{{ asset('storage/' . $avatar) }}" alt="Avatar" />
-                    <p>{{ $firstName }} {{ $lastName }}</p>
-                </div>
-                <script>
-                    document.addEventListener('click', function(event) {
-                        if (!document.querySelector('.header_userInfo-logo').contains(event.target)) {
-                            document.querySelector('.header_userInfo-info').style.display = 'none';
-                        }
-                    });
-                    document.querySelector('.header_userInfo-logo').addEventListener('click', function () {
-                        document.querySelector('.header_userInfo-info').style.display = 'block';
-                    });
-                </script>
-            @else
-                <a onclick="showModalRegister()">Đăng Ký</a>
-                <a onclick="openModal()">Đăng Nhập</a>
-            @endif
-                <div class="header_userInfo-info">
-                    <a href="edit_profile.php">
-                        <i class="fa-solid fa-user"></i>
-                        <label>Chỉnh sửa hồ sơ</label>
-                    </a>
-                    <a href="transaction_list.php">
-                        <i class="fa-solid fa-table-list"></i>
-                        <label>Danh sách giao dịch</label>
-                    </a>
-                    <a href="my_bookings.php">
-                        <i class="fa-solid fa-chair"></i>
-                        <label>Đặt chỗ của tôi</label>
-                    </a>
-                    <form method="post" action="{{ route('logout') }}">
-                        @csrf
-                        <button type="submit" class="logout-button">
-                            <i class="fa-solid fa-arrow-right-from-bracket"></i>
-                            <label>Đăng xuất</label>
-                        </button>
-                    </form>
-                </div>
-            </div>
-        </nav>
-    </header>
+    @include('elements.header')
 
     <div class="label_list">Danh sách chuyến bay</div>
 
@@ -85,9 +36,7 @@ $flight_listsReturn = $FlightList->get_flights($to, $from, $return_date, $chairT
                         <label><span>1</span></label>
                         <div>
                             <p>{{ $home_controller->formatVietnameseDate($departure) }}</p>
-                            @foreach ($flight_listNameCity as $item)
-                                <p>{{ $item->departure_cityName }} <i class="fa-solid fa-arrow-right-long"></i> {{ $item->arrival_cityName }}</p>
-                            @endforeach
+                            <p>{{ $flight_listNameCity[0]->departure_cityName }} <i class="fa-solid fa-arrow-right-long"></i> {{ $flight_listNameCity[0]->arrival_cityName }}</p>
                         </div>
                     </div>
                     <div class="myFlight_dep-main">
@@ -110,11 +59,7 @@ $flight_listsReturn = $FlightList->get_flights($to, $from, $return_date, $chairT
                                 <label>{{ $to }}</label>
                             </div>
                             <div>
-                                <?php
-                                foreach ($flight_listNameCity as $flight) {
-                                    echo '<p>'. $flight['time'] .'</p>';
-                                }
-                                ?>
+                                <p>{{ $flight_listNameCity[0]->time }}</p>
                                 <a>Bay thẳng</a>
                             </div>
                         </div>
@@ -152,9 +97,7 @@ $flight_listsReturn = $FlightList->get_flights($to, $from, $return_date, $chairT
                                     <label>{{ $from }}</label>
                                 </div>
                                 <div>
-                                    @foreach ($flight_listNameCity as $flight)
-                                        <p>{{ $flight->time }}</p>
-                                    @endforeach
+                                    <p>{{ $flight_listNameCity[0]->time }}</p>
                                     <a>Bay thẳng</a>
                                 </div>
                             </div>
@@ -165,38 +108,6 @@ $flight_listsReturn = $FlightList->get_flights($to, $from, $return_date, $chairT
             </div>
             <div class="list_filter">
                 <h3>Bộ lọc</h3>
-                <label class="list_filter-from">Từ</label>
-                <select name="" id="list_filter-from">
-                    <option value="HAN">Sân bay Nội Bài ( HAN )</option>
-                    <option value="SGN">Sân bay Tân Sơn Nhất ( SGN )</option>
-                    <option value="DAD">Sân bay Đà Nẵng ( DAD )</option>
-                    <option value="VDO">Sân bay Vân Đồn ( VDO )</option>
-                    <option value="HPH">Sân bay Cát Bì ( HPH )</option>
-                    <option value="VII">Sn bay Vinh ( VII )</option>
-                    <option value="HUI">Sân bay Phú Bài ( HUI )</option>
-                    <option value="CXR">Sân bay Cam Ranh ( CXR )</option>
-                    <option value="DLI">Sân bay Liên Khương ( DLI )</option>
-                    <option value="UIH">Sân bay Phù Cát ( UIH )</option>
-                    <option value="VCA">Sân bay Cần Thơ ( VCA )</option>
-                    <option value="PQC">Sân bay Phú Quốc ( PQC )</option>
-                </select>
-                <label class="list_filter-to">Đến</label>
-                <select name="" id="list_filter-to">
-                    <option value="HAN">Sân bay Nội Bài ( HAN )</option>
-                    <option value="SGN">Sân bay Tân Sơn Nhất ( SGN )</option>
-                    <option value="DAD">Sân bay Đà Nẵng ( DAD )</option>
-                    <option value="VDO">Sân bay Vân Đồn ( VDO )</option>
-                    <option value="HPH">Sân bay Cát Bì ( HPH )</option>
-                    <option value="VII">Sn bay Vinh ( VII )</option>
-                    <option value="HUI">Sân bay Phú Bài ( HUI )</option>
-                    <option value="CXR">Sân bay Cam Ranh ( CXR )</option>
-                    <option value="DLI">Sân bay Liên Khương ( DLI )</option>
-                    <option value="UIH">Sân bay Phù Cát ( UIH )</option>
-                    <option value="VCA">Sân bay Cần Thơ ( VCA )</option>
-                    <option value="PQC">Sân bay Phú Quốc ( PQC )</option>
-                </select>
-                <label class="list_filter-dateGo">Ngày đi</label>
-                <input type="date" name="" id="list_filter-dateGo">
                 <div class="list_filter_airline">
                     <div class="list_filter-title" onclick="show_airline()">
                         <label>Hãng hàng không</label>
@@ -400,7 +311,7 @@ $flight_listsReturn = $FlightList->get_flights($to, $from, $return_date, $chairT
                                         <p>{{ $from }}</p>
                                     </div>
                                     <div class="flight_list-time">
-                                        <p>{{ $flight->time }}</p>
+                                        <p>{{ $flight_listNameCity[0]->time }}</p>
                                         <div class="flight_list-timeLength">
                                             <div></div>
                                             <span></span>
@@ -483,7 +394,7 @@ $flight_listsReturn = $FlightList->get_flights($to, $from, $return_date, $chairT
                                             <p>{{ $to }}</p>
                                         </div>
                                         <div class="flight_list-time">
-                                            <p>{{ $flight->time }}</p>
+                                            <p>{{ $flight_listNameCity[0]->time }}</p>
                                             <div class="flight_list-timeLength">
                                                 <div></div>
                                                 <span></span>
@@ -554,11 +465,9 @@ $flight_listsReturn = $FlightList->get_flights($to, $from, $return_date, $chairT
                 <div class="yourTrip_content-info">
                     <div class="yourTrip_content-info-content">
                         <div class="yourTrip_content-info-content1">
-                            @foreach ($flight_listNameCity as $flight)
-                                <p>{{ $flight->departure_cityName }}</p>
-                                <i class="fa-solid fa-arrow-right"></i>
-                                <p>{{ $flight->arrival_cityName }}</p>
-                            @endforeach
+                            <p>{{ $flight_listNameCity[0]->departure_cityName }}</p>
+                            <i class="fa-solid fa-arrow-right"></i>
+                            <p>{{ $flight_listNameCity[0]->arrival_cityName }}</p>
                             <?php
                             list($year, $month, $day) = explode('-', $departure);
                             ?>
@@ -575,9 +484,7 @@ $flight_listsReturn = $FlightList->get_flights($to, $from, $return_date, $chairT
                                     <p>{{ $from }}</p>
                                 </div>
                                 <div class="content2-info-time">
-                                    @foreach ($flight_listNameCity as $item)
-                                        <p>{{ $item->time }}</p>
-                                    @endforeach
+                                    <p>{{ $flight_listNameCity[0]->time }}</p>
                                     <div class="content2-info-timeLength">
                                         <div></div>
                                         <span></span>
@@ -615,9 +522,7 @@ $flight_listsReturn = $FlightList->get_flights($to, $from, $return_date, $chairT
                                     <p>{{ $to }}</p>
                                 </div>
                                 <div class="content2-info-time">
-                                    @foreach ($flight_listNameCity as $item)
-                                        <p>{{ $item->time }}</p>
-                                    @endforeach
+                                    <p>{{ $flight_listNameCity[0]->time }}</p>
                                     <div class="content2-info-timeLength">
                                         <div></div>
                                         <span></span>

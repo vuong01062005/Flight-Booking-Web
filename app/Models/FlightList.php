@@ -23,12 +23,13 @@ class FlightList extends Model
         'flight_date',
         'airline',
         'flight_name',
+        'status',
     ];
 
     public $timestamps = true;
 
     public function get_flights($from, $to, $depart, $chairType) {
-        $flights = self::select('flight_lists.flight_code', 'flight_lists.departure_time', 'flight_lists.arrival_time', 'flight_lists.time', 'flight_lists.airline', 'flight_chair_lists.price_adult', 'flight_chair_lists.price_child', 'flight_chair_lists.price_infant', 'flight_lists.departure_cityName', 'flight_lists.arrival_cityName')
+        $flights = self::select('flight_lists.id', 'flight_lists.flight_code', 'flight_lists.departure_time', 'flight_lists.departure_city', 'flight_lists.arrival_city', 'flight_lists.arrival_time', 'flight_lists.time', 'flight_lists.airline', 'flight_lists.flight_date', 'flight_chair_lists.price_adult', 'flight_chair_lists.price_child', 'flight_chair_lists.price_infant', 'flight_lists.departure_cityName', 'flight_lists.arrival_cityName')
                 ->join('flight_chair_lists', 'flight_lists.flight_code', '=', 'flight_chair_lists.flight_code')
                 ->where('flight_lists.departure_city', $from)
                 ->where('flight_lists.arrival_city', $to)
@@ -94,7 +95,51 @@ class FlightList extends Model
             'flight_date' => $flight_date,
             'airline' => $airline,
             'flight_name' => $flight_name,
+            'status' => 'Chưa bay'
         ]);
+
+        return $flight;
+    }
+
+    public function getFlightByID($id) {
+        $flight = self::select('flight_lists.*', 'flight_chair_lists.*', 'flight_lists.status as status_flight')
+                ->join('flight_chair_lists', 'flight_lists.flight_code', '=', 'flight_chair_lists.flight_code')
+                ->where('flight_lists.id', $id)
+                ->first();
+
+        return $flight;
+    }
+
+    public function updateFlight($flight_code, $departure_city, $departure_cityName, $arrival_city, $arrival_cityName, $departure_time, $arrival_time, $time, $flight_date, $status) {
+        $flight = self::where('flight_code', $flight_code)->update([
+            'departure_city' => $departure_city,
+            'departure_cityName' => $departure_cityName,
+            'arrival_city' => $arrival_city,
+            'arrival_cityName' => $arrival_cityName,
+            'departure_time' => $departure_time,
+            'arrival_time' => $arrival_time,
+            'time' => $time,
+            'flight_date' => $flight_date,
+            'status' => $status,
+        ]);
+
+        return $flight;
+    }
+
+    public function deleteFlight($id) {
+        $flight = self::where('id', $id)->delete();
+
+        return $flight;
+    }
+
+    public function getFlightByCode($flight_code) {
+        $flight = self::select('*')->where('flight_code', $flight_code)->first();
+
+        return $flight;
+    }
+
+    public function flightByID($id) {
+        $flight = self::select('*')->where('id', $id)->first();
 
         return $flight;
     }

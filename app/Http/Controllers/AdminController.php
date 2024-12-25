@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\AccountUser;
 use App\Models\ContactList;
 use App\Models\CustomerList;
 use App\Models\FlightList;
@@ -227,5 +228,51 @@ class AdminController extends Controller
         $contacts = $ContactList->customerContactListByID($id);
 
         return view('admin.customer_contact', compact('contacts'));
+    }
+
+    public function updateFlight($id) {
+        $FlightList = new FlightList();
+        $flight = $FlightList->getFlightByID($id);
+        return view('admin.update_flight', compact('flight'));
+    }
+
+    public function updateFlightInfo(Request $request) {
+        $flight_code = $request->post('flight_code');
+        $departure_str = $request->post('departure_city');
+        list($departure_city, $departure_cityName) = !empty($departure_str) ? explode(' ', $departure_str, 2) : ['', ''];
+        $arrival_str = $request->post('arrival_city');
+        list($arrival_city, $arrival_cityName) = !empty($arrival_str) ? explode(' ', $arrival_str, 2) : ['', ''];
+        $departure_date = $request->post('departure_date');
+        $departure_time = $request->post('departure_time');
+        $arrival_time = $request->post('arrival_time');
+        $time = $request->post('time');
+        $status = $request->post('status');
+
+        $flight_lists = new FlightList();
+        $flight_lists->updateFlight($flight_code, $departure_city, $departure_cityName, $arrival_city, $arrival_cityName, $departure_time, $arrival_time, $time, $departure_date, $status);
+
+        return redirect('flight-list');
+    }
+
+    public function deleteFlight($id) {
+        try {
+            $flight_lists = new FlightList();
+            $flight_lists->deleteFlight($id);
+
+            return response()->json(['success' => true, 'message' => 'Chuyến bay đã được xóa!']);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Có lỗi xảy ra khi xóa chuyến bay.']);
+        }
+    }
+
+    public function getCustomerAccount() {
+        $AccountUser = new AccountUser();
+
+        $accounts = $AccountUser->getAccountList(2);
+        return view('admin.customer_account', compact('accounts'));
+    }
+
+    public function revenue() {
+        return view('admin.revenue');
     }
 }

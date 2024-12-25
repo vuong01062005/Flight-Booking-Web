@@ -25,16 +25,17 @@ header {
 }
 .header_logo {
     font-size: 1.5rem;
-    color: var(--color_main);
+    color: #356ff5;
 }
 .header_nav {
     display: flex;
     align-items: center;
 }
 .header_nav a {
-    color: var(--color_main);
+    color: #356ff5;
     font-size: 12px;
     margin: 0.8rem;
+    cursor: pointer;
 }
 .header_userInfo {
     margin-left: 0.8rem;
@@ -42,7 +43,7 @@ header {
 .header_userInfo-logo {
     display: flex;
     font-size: 0.8rem;
-    color: var(--color_main);
+    color: #356ff5;
     border: 1px solid #fff;
     padding: 0.4rem 0.8rem;
     border-radius: 5px;
@@ -69,6 +70,7 @@ header {
 .header_userInfo-info {
     display: none;
     flex-direction: column;
+    cursor: pointer;
 }
 .header_userInfo-info a {
     display: flex;

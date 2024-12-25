@@ -93,7 +93,7 @@
                                     <option value="DAD">Sân bay Đà Nẵng ( DAD )</option>
                                     <option value="VDO">Sân bay Vân Đồn ( VDO )</option>
                                     <option value="HPH">Sân bay Cát Bì ( HPH )</option>
-                                    <option value="VII">Sn bay Vinh ( VII )</option>
+                                    <option value="VII">Sân bay Vinh ( VII )</option>
                                     <option value="HUI">Sân bay Phú Bài ( HUI )</option>
                                     <option value="CXR">Sân bay Cam Ranh ( CXR )</option>
                                     <option value="DLI">Sân bay Liên Khương ( DLI )</option>
@@ -115,7 +115,7 @@
                                     <option value="DAD">Sân bay Đà Nẵng ( DAD )</option>
                                     <option value="VDO">Sân bay Vân Đồn ( VDO )</option>
                                     <option value="HPH">Sân bay Cát Bì ( HPH )</option>
-                                    <option value="VII">Sn bay Vinh ( VII )</option>
+                                    <option value="VII">Sân bay Vinh ( VII )</option>
                                     <option value="HUI">Sân bay Phú Bài ( HUI )</option>
                                     <option value="CXR">Sân bay Cam Ranh ( CXR )</option>
                                     <option value="DLI">Sân bay Liên Khương ( DLI )</option>
@@ -148,7 +148,6 @@
             </div>
         </form>
     </section>
-
 
     
     <script src="{{ asset('assets/js/main.js') }}"></script>

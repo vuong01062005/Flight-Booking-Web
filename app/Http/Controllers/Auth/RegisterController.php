@@ -78,6 +78,7 @@ class RegisterController extends Controller
                     'BirthDay' => $request->birthDay,
                     'Avatar' => $icon,
                     'password' => bcrypt($request->pass),
+                    'wallet' => '0',
                 ]);
             } catch (\Exception $e) {
                 return response()->json([

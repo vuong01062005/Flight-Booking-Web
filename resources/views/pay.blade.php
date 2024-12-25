@@ -1,6 +1,8 @@
 @php
     use App\Models\FlightChairList;
-    
+    use App\Models\AccountUser;
+
+    $AccountUser = new AccountUser();
     $FlightChairList = new FlightChairList();
     
     for ($i=0; $i < $countAdult; $i++) {
@@ -31,7 +33,7 @@
 </head>
 <body>
     <header class="header">
-        <a href="{{ route('home') }}" class="header_logo">DINHVUONG</a>
+        <a href="{{ route('home') }}" class="header_logo">DINH VUONG</a>
         <nav class="header_step">
             <label>1</label>
             <p>Điền thông tin</p>
@@ -58,9 +60,25 @@
         </div>
         <div class="container_main-pays">
             <h2>Bạn muốn thanh toán như thế nào?</h2>
+            <div class="container_main-pays-wallet">
+                <div>
+                    <input type="radio" name="pay" value="Ví của tôi" checked>
+                    <label>Ví của tôi</label>
+                </div>
+                <div>
+                    <ul>
+                        @php
+                            $wallet = $AccountUser->getWalletbyID(session('userID'));
+                        @endphp
+                        <li>Ví của bạn hiện tại là: {{ $wallet->wallet }} VND</li>
+                        <li>Tiền sẽ tự động trừ vào tiền của ví của bạn sau khi bạn nhấn Thanh toán.</li>
+                        <li>Vui long sử dụng mã QR mới nhất được cung cấp để hoàn tất thanh toán của bạn.</li>
+                    </ul>
+                </div>
+            </div>
             <div class="container_main-pays-qrcode">
                 <div>
-                    <input type="radio" name="pay" value="qrcode" checked>
+                    <input type="radio" name="pay" value="Qr Code">
                     <label>QR Code</label>
                 </div>
                 <div>
@@ -74,7 +92,7 @@
             <div class="container_main-pays-e-wallets">
                 <div>
                     <div>
-                        <input type="radio" name="pay" value="wallets">
+                        <input type="radio" name="pay" value="Ví điện tử">
                         <label>Ví điện tử khác</label>
                     </div>
                     <div>
@@ -106,14 +124,14 @@
                         <p>Chọn tài khoản đích</p>
                         <div class="pays_transfer-content pays_transfer-slected">
                             <div>
-                                <input type="radio" name="pay-transfer" value="pay-transfer-mbbank" checked>
+                                <input type="radio" name="payTransfer" value="MB Bank" checked>
                                 <label>MB Bank</label>
                             </div>
                             <img src="{{ asset('storage/images/MBBank.png') }}" alt="MBBank">
                         </div>
                         <div class="pays_transfer-content">
                             <div>
-                                <input type="radio" name="pay-transfer" value="pay-transfer-vietcom">
+                                <input type="radio" name="payTransfer" value="Vietcombank">
                                 <label>Vietcombank</label>
                             </div>
                             <img src="{{ asset('storage/images/vietcombank.png') }}" alt="VietCom">
@@ -130,7 +148,7 @@
                     <i class="fa-solid fa-chevron-down"></i>
                 </div>
             </div>
-            <button type="button" onclick="loading()">Thanh toán <span>QR Code</span></button>
+            <button type="button" onclick="loading()">Thanh toán <span>Ví của tôi</span></button>
         </div>
     </section>
 
@@ -174,28 +192,33 @@
             <div class="pay_detail-contentRight">
                 <div>
                     <h4>Chi tiết</h4>
-                    <p>Mã đặt chỗ: <span></span></p>
+                    <p>Mã đặt chỗ: <span>{{ $bookingCode }}</span></p>
                 </div>
                 <div>
                     <p>Số tiền</p>
-                    <p>9.999.999 VND</p>
+                    <p>{{ $price }} VND</p>
                 </div>
             </div>
         </div>
 
-        <input type="hidden" name="userID" value="{{ session('userID')}}">
+        <input type="hidden" name="userID" value="{{ session('userID') }}">
         <input type="hidden" name="contact_firstName" value="{{ $contact_firstName }}">
         <input type="hidden" name="contact_lastName" value="{{ $contact_lastName }}">
         <input type="hidden" name="contact_phone" value="{{ $contact_phone }}">
         <input type="hidden" name="contact_email" value="{{ $contact_email }}">
 
         <input type="hidden" name="flight_code" value="{{ $flight_code }}">
+        <input type="hidden" name="departure_city" value="{{ $departure_city }}">
+        <input type="hidden" name="arrival_city" value="{{ $arrival_city }}">
         <input type="hidden" name="flight_codeReturn" value="{{ $flight_codeReturn }}">
         <input type="hidden" name="customer_type" value="{{ $chairType }}">
+        <input type="hidden" name="price" value="{{ $price }}">
+        <input type="hidden" name="booking_code" value="{{ $bookingCode }}">
 
         <input type="hidden" name="countAdult" value="{{ $countAdult }}">
         <input type="hidden" name="countChild" value="{{ $countChild }}">
         <input type="hidden" name="countInfant" value="{{ $countInfant }}">
+        <input type="hidden" name="method" id="method">
 
         @php
             $customerAdult = [];
@@ -212,6 +235,7 @@
                     'lastName' => $lastName_Adult[$i],
                     'birthday' => $year_Adult[$i] . '-' . $month_Adult[$i] . '-' . $day_Adult[$i],
                     'chair' => $chair_Adult[$i],
+                    'nation' => $nation_Adult[$i],
                 ];
                 $chairAdultReturn[] =['chair' => $chair_AdultReturn[$i]];
             }
@@ -222,6 +246,7 @@
                     'lastName' => $lastName_Child[$i],
                     'birthday' => $year_Child[$i] . '-' . $month_Child[$i] . '-' . $day_Child[$i],
                     'chair' => $chair_Child[$i],
+                    'nation' => $nation_Child[$i],
                 ];
                 $chairChildReturn[] =['chair' => $chair_ChildReturn[$i]];
             }
@@ -232,6 +257,7 @@
                     'lastName' => $lastName_Infant[$i],
                     'birthday' => $year_Infant[$i] . '-' . $month_Infant[$i] . '-' . $day_Infant[$i],
                     'chair' => $chair_Infant[$i],
+                    'nation' => $nation_Infant[$i],
                 ];
                 $chairInfantReturn[] =['chair' => $chair_InfantReturn[$i]];
             }

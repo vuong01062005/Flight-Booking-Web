@@ -42,6 +42,9 @@
 .header_step p {
     color: var(--color_2);
 }
+.header_step i {
+    margin-right: 10px;
+}
 .header_step label:first-child {
     background-color: var(--color_1);
     color: #fff;
@@ -53,7 +56,8 @@
     margin: 0 10px;
 }
 
-form {
+form,
+#form_info {
     padding-left: 20%;
     font-family: Godwit,-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol;
 }
@@ -288,7 +292,7 @@ form {
 
 .content-info-content2-info {
     display: flex;
-    margin-top: 16px;
+    margin: 16px 0;
 }
 .content2-info-time {
     margin: 0 16px;
@@ -341,6 +345,13 @@ form {
     height: 1px;
     width: 40px;
     background-color: #ccc;
+}
+.content-info-content2-price {
+    display: flex;
+    align-items: center;
+}
+.content-info-content2-price p {
+    font-weight: 500;
 }
 
 
@@ -632,4 +643,22 @@ form {
 .chairDetail-content-infoAirlineReturn,
 .chairDetail_content-main-leftReturn {
     display: none;
+}
+
+
+
+
+
+
+.confirm {
+    position: absolute;
+    background-color: rgb(125 133 138);
+    color: #fff;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 14px;
+    display: block;
+    padding: 20px;
+    border-radius: 5px;
 }

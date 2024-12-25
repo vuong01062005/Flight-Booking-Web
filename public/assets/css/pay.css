@@ -95,6 +95,7 @@ body {
     cursor: pointer;
 }
 .container_main-pays-qrcode,
+.container_main-pays-wallet,
 .container_main-pays-e-wallets,
 .container_main-pays-transfer {
     margin: 20px 20px;
@@ -102,17 +103,20 @@ body {
     border-bottom: 1px solid #ccc;
 }
 .container_main-pays-qrcode label,
+.container_main-pays-wallet label,
 .container_main-pays-e-wallets label,
 .container_main-pays-transfer label {
     font-size: 20px;
     font-weight: 600;
 }
 .container_main-pays-qrcode div:last-child,
+.container_main-pays-wallet div:last-child,
 .container_main-pays-e-wallets div:last-child,
 .container_main-pays-transfer-content {
     padding: 20px;
 }
 .container_main-pays-qrcode div ul,
+.container_main-pays-wallet div ul,
 .container_main-pays-e-wallets div ul,
 .container_main-pays-transfer-content ul {
     padding: 20px 40px;
@@ -146,7 +150,8 @@ body {
 }
 
 .pays_e-wallets-content,
-.container_main-pays-transfer-content {
+.container_main-pays-transfer-content,
+.container_main-pays-qrcode div:last-child{
     display: none;
 }
 

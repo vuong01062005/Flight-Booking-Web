@@ -39,7 +39,7 @@
                     </thead>
                     <tbody>
                         @php
-                        $flights = $FlightList->showFlightListPage(1);
+                        $flights = $FlightList->showFlightListPage(5);
                         @endphp
                         @foreach ($flights as $flight)
                             <tr>
@@ -51,8 +51,8 @@
                                 <td>{{ $flight->flight_date }}</td>
                                 <td>{{ $flight->airline }}</td>
                                 <td>{{ $flight->flight_name }}</td>
-                                <td><a href="">Chỉnh sửa</a></td>
-                                <td><a href="">Xóa</a></td>
+                                <td><a href="{{ route('update-flight', ['id'=>$flight->id]) }}">Chỉnh sửa</a></td>
+                                <td><a href="javascript:void(0)" onclick="confirmDelete({{ $flight->id }})">Xóa</a></td>
                             </tr>
                         @endforeach
                     </tbody>
@@ -111,5 +111,33 @@
     <section id="draggable" class="draggable">
         Kéo tôi đi xung quanh!
     </section>
+
+
+    <script>
+        function confirmDelete(id) {
+            if (confirm('Bạn có chắc muốn xóa chuyến bay này không?')) {
+                fetch(`/delete-flight/${id}`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(data.message);
+                        location.reload();
+                    } else {
+                        alert(data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Lỗi:', error);
+                    alert('Có lỗi xảy ra. Vui lòng thử lại!');
+                });
+            }
+        }
+    </script>
 </body>
 </html>
